@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pre-dex-items>
+
+    <item
+        dex="C:\Users\kbartush\AndroidstudioProjects\GentPass\app\build\intermediates\pre-dexed\debug\json-simple-1.1.1-2a62df76b7f4d777088603f69346de6d16d69c6b.jar"
+        jar="C:\Users\kbartush\AndroidstudioProjects\GentPass\app\libs\json-simple-1.1.1.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="5d6f9b6a9ddca2a28c0216cc44efb2e20d9c23b5"/>
+
+</pre-dex-items>
