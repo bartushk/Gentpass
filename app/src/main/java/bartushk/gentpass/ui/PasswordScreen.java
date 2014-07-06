@@ -55,8 +55,6 @@ public class PasswordScreen extends Activity implements OnClickListener,
 	AlertDialog longClickDialog;
 	// AlertDialog to confirm a list item deletion.
 	AlertDialog confirmDialog;
-	// ArrayList holding all the users current PasswordInfo.
-	ArrayList<PasswordInfo> passwordsAll;
 	// ArrayList holding the displayed PasswordInfo
 	ArrayList<PasswordInfo> passwordsDisplayed;
 	// The most currently long clicked password info.
@@ -76,15 +74,8 @@ public class PasswordScreen extends Activity implements OnClickListener,
 		passwordsDisplayed = new ArrayList<PasswordInfo>();
 
 		// Populate the passwordsAll ArrayList.
-		try {
-			Reader read = new Reader();
-			passwordsAll = read.getUserPasswords(currentUser);
-			Utils.passwordInfoInsertionSort(passwordsAll);
-			initUI();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
+        Utils.passwordInfoInsertionSort(currentUser.getPasswordInfos());
+        initUI();
 	}
 
 	@Override
@@ -99,7 +90,7 @@ public class PasswordScreen extends Activity implements OnClickListener,
 			if (resultCode == Activity.RESULT_OK) {
 				// If it was an edited password, remove the previous password.
 				if (edit) {
-					passwordsAll.remove(currentPass);
+                    currentUser.getPasswordInfos().remove(currentPass);
 					edit = false;
 
 				}
@@ -108,10 +99,10 @@ public class PasswordScreen extends Activity implements OnClickListener,
 				String password = data.getStringExtra("password");
 				String notes = data.getStringExtra("notes");
 				// Add a new password to the passwords ArrayList.
-				passwordsAll.add(new PasswordInfo(title, password, notes));
+                currentUser.getPasswordInfos().add(new PasswordInfo(title, password, notes));
 
 				// Resort the list.
-				Utils.passwordInfoInsertionSort(passwordsAll);
+				Utils.passwordInfoInsertionSort(currentUser.getPasswordInfos());
 
 				// Rewrite the list.
 				saveListToSDCard();
@@ -195,7 +186,7 @@ public class PasswordScreen extends Activity implements OnClickListener,
 					public void onClick(DialogInterface dialog, int id) {
 						// When this button, titled Delete, is clicked, delete
 						// the corresponding item from the passwords list.
-						passwordsAll.remove(currentPass);
+                        currentUser.getPasswordInfos().remove(currentPass);
 
 						// Save changes to the SD card and reset the
 						// PasswordList to show changes.
@@ -277,16 +268,16 @@ public class PasswordScreen extends Activity implements OnClickListener,
 		passwordsDisplayed.clear();
 		String search = searchEdit.getText().toString().toLowerCase();
 		ArrayList<String> toDisplay = new ArrayList<String>();
-		if (!passwordsAll.isEmpty()) {
+		if (!currentUser.getPasswordInfos().isEmpty()) {
 			// If the passwordsAll list is not empty, iterate through it adding
 			// the title to the toDisplay string array list and the PasswordInfo
 			// to the passwordsDisplayed ArrayList if the password search text
 			// is empty or the title contains the search text.
-			for (int i = 0; i < passwordsAll.size(); i++) {
+			for (int i = 0; i < currentUser.getPasswordInfos().size(); i++) {
 				if (search.equals("")
-						|| passwordsAll.get(i).getTitle().toLowerCase().contains(search)) {
-					toDisplay.add(passwordsAll.get(i).getTitle());
-					passwordsDisplayed.add(passwordsAll.get(i));
+						|| currentUser.getPasswordInfos().get(i).getTitle().toLowerCase().contains(search)) {
+					toDisplay.add(currentUser.getPasswordInfos().get(i).getTitle());
+					passwordsDisplayed.add(currentUser.getPasswordInfos().get(i));
 				}
 			}
 		} else {
@@ -301,7 +292,7 @@ public class PasswordScreen extends Activity implements OnClickListener,
 	private void saveListToSDCard() {
 		try {
 			Writer write = new Writer();
-			write.rewriteUserPasswords(currentUser, passwordsAll);
+			write.rewriteUserPasswords(currentUser);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

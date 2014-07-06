@@ -1,7 +1,9 @@
 package bartushk.gentpass.ui;
 
+import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -10,12 +12,17 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
 import bartushk.gentpass.R;
 import bartushk.gentpass.core.Authorizer;
 import bartushk.gentpass.core.GentPassApp;
+import bartushk.gentpass.core.Utils;
 import bartushk.gentpass.data.User;
+import bartushk.gentpass.io.Reader;
+import bartushk.gentpass.web.LocalTrustHttpClient;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -42,7 +49,7 @@ public class LoginScreen extends Activity implements OnClickListener {
 
 	// Buttons used to either attempt a login, move to the new user creation
 	// activity, and to move to password generation.
-	Button loginButton, newUserButton, generateButton, testButton;
+	Button loginButton, newUserButton, generateButton;
 
 	// Checkbox where the user can decide if they want their username rememberd.
 	CheckBox rememberCheck;
@@ -79,14 +86,12 @@ public class LoginScreen extends Activity implements OnClickListener {
 		usernameEdit = (EditText) findViewById(R.id.usernameEdit);
 		loginButton = (Button) findViewById(R.id.loginButton);
 		newUserButton = (Button) findViewById(R.id.newUserButton);
-		testButton = (Button) findViewById(R.id.testButton);
 		generateButton = (Button) findViewById(R.id.generatePasswordButton);
 		rememberCheck = (CheckBox) findViewById(R.id.rememberCheck);
 		// Set button onClickListeners
 		loginButton.setOnClickListener(this);
 		newUserButton.setOnClickListener(this);
 		generateButton.setOnClickListener(this);
-		testButton.setOnClickListener(this);
 		// Set the rememberCheck based off the userPreferences.
 		rememberCheck.setChecked(userPrefs.getBoolean("checked", false));
 		// If it's checked, set the usernameEdit text to the username in
@@ -116,17 +121,19 @@ public class LoginScreen extends Activity implements OnClickListener {
 		}
 
 	}
-	//https://localhost:60259/
-	
+
+
 	private void testFunc(){
+        final HttpClient client = new LocalTrustHttpClient(this);
 		Thread jsonPostThread = new Thread(){
 			
-			public void run(){				
-				HttpClient client = new DefaultHttpClient();
-				HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000);
-				HttpResponse response;
-				JSONObject json = new JSONObject();
-				try{
+			public void run(){
+                try{
+
+                    HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000);
+                    HttpResponse response;
+                    JSONObject json = new JSONObject();
+
 					HttpPost post = new HttpPost("https://192.168.1.9:32487/");
 					json.put("test", "derp");
 					StringEntity se = new StringEntity( json.toString() );
@@ -134,11 +141,13 @@ public class LoginScreen extends Activity implements OnClickListener {
 					post.setEntity(se);
 					response = client.execute(post);
 					if(response!=null){
-						InputStream in = response.getEntity().getContent();
+                        HttpEntity entity = response.getEntity();
+                        String responseString = EntityUtils.toString(entity, "UTF-8");
+                        Log.d("responseString", responseString);
 					}
 					
 				}catch(Exception e){
-					Log.d("derpity","derp error");
+					Log.d("derpity", "derp error");
 				}
 			}		
 		};
@@ -162,6 +171,13 @@ public class LoginScreen extends Activity implements OnClickListener {
 			if (Authorizer.validateUser(tmp)) {
 				// Set the user SharedPreferences.
 				setPreferences();
+
+                try {
+                    Reader read = new Reader();
+                    tmp.setPasswordInfos(read.getUserPasswords(tmp));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 				// Set the user in the application context.
 				((GentPassApp) this.getApplication()).setUser(tmp);
 				// Start the password viewing activity.

@@ -1,6 +1,8 @@
 package bartushk.gentpass.core;
 
 import bartushk.gentpass.data.User;
+import bartushk.gentpass.web.SyncService;
+
 import android.app.Application;
 
 /**
@@ -13,6 +15,7 @@ import android.app.Application;
 public class GentPassApp extends Application {
 	//User to be preserved across activities.
 	private User user;
+    private SyncService syncService = new SyncService(this.getBaseContext());
 	
 	//setters
 	public void setUser(User user) {

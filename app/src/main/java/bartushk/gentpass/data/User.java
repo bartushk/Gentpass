@@ -1,12 +1,18 @@
 package bartushk.gentpass.data;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
 
 import android.os.Environment;
+
+import bartushk.gentpass.core.Utils;
 import bartushk.gentpass.crypto.HashUtils;
+import bartushk.gentpass.io.Reader;
 
 /**
- * Name : PasswordInfo.java <br>
+ * Name : User.java <br>
  * Author : Kyle Bartush<br>
  * Version : 1.0<br>
  * Description : A class used to hold all the information pertaining to an
@@ -19,11 +25,17 @@ public class User {
 	// in the users file to verify users.
 	private String username, password, passChallenge;
 
-	// The File pointer to the users encrypted password file.
-	private File passwordFile;
-
-	// The user's encryptoin key.
+	// The user's encryption key.
 	private byte[] aesKey;
+
+    // The filename for the password info to be saved under.
+    private String fileName;
+
+    // Date time, last updated.
+    private Date lastUpdated;
+
+    // User currently saved passwords.
+    private ArrayList<PasswordInfo> passwordInfos;
 	
 	//Master key used for identity. Is encrypted with username password locally.
 	private byte[] masterKey = new byte[32];
@@ -32,6 +44,7 @@ public class User {
 	public User(String username, String password) {
 		this.username = username;
 		this.password = password;
+        this.passwordInfos = new ArrayList<PasswordInfo>();
 		setAdditionalInfo();
 	}
 
@@ -48,15 +61,24 @@ public class User {
 		return this.passChallenge;
 	}
 
+    public ArrayList<PasswordInfo> getPasswordInfos(){
+        return this.passwordInfos;
+    }
+
 	public byte[] getKey() {
 		return this.aesKey;
 	}
 
-	public File getFile() {
-		return this.passwordFile;
-	}
+    public String getFileName(){
+        return this.fileName;
+    }
 
 	// Setters
+
+
+    public void setPasswordInfos(ArrayList<PasswordInfo> passInfos){
+        this.passwordInfos = passInfos;
+    }
 
 	// also sets additional info when the username is changed.
 	public void setUsername(String username) {
@@ -89,12 +111,7 @@ public class User {
 		
 		//The filename is the sha1 hash of the password salted
 		//by the first 10 characters of the md5 hash of the password.
-		String fileName = HashUtils.shaHex(password
+		this.fileName = HashUtils.shaHex(password
 				+ HashUtils.md5Hex(password).substring(0, 10));
-		
-		// Password file is stored individually for each user and the filename
-		//is a hash making it indistinguishable from other users.
-		passwordFile = new File(Environment.getExternalStorageDirectory()
-				+ File.separator + "gentpass" + File.separator + fileName);
 	}
 }
