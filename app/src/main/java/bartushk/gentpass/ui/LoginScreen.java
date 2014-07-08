@@ -119,7 +119,6 @@ public class LoginScreen extends Activity implements OnClickListener {
 			testFunc();
 			break;
 		}
-
 	}
 
 
@@ -164,22 +163,23 @@ public class LoginScreen extends Activity implements OnClickListener {
 		// create a temporary User with them.
 		String username = usernameEdit.getText().toString();
 		String password = passwordEdit.getText().toString();
-		User tmp = new User(username, password);
+
 		// Make sure the password is at least 8 characters long.
 		if (username.length() > 7 && password.length() > 7) {
 			// Check if the username and password are valid.
-			if (Authorizer.validateUser(tmp)) {
+            User user = Authorizer.validateUser(username,password);
+			if (user != null) {
 				// Set the user SharedPreferences.
 				setPreferences();
 
                 try {
                     Reader read = new Reader();
-                    tmp.setPasswordInfos(read.getUserPasswords(tmp));
+                    user.setPasswordInfos(read.getUserPasswords(user));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 				// Set the user in the application context.
-				((GentPassApp) this.getApplication()).setUser(tmp);
+				((GentPassApp) this.getApplication()).setUser(user);
 				// Start the password viewing activity.
 				Intent i = new Intent(LoginScreen.this, PasswordScreen.class);
 				startActivity(i);

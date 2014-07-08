@@ -1,6 +1,7 @@
 package bartushk.gentpass.ui;
 
 import java.io.IOException;
+import java.util.Date;
 
 import bartushk.gentpass.R;
 import bartushk.gentpass.core.Authorizer;
@@ -73,10 +74,11 @@ public class NewUserScreen extends Activity implements OnClickListener {
 		// Checks username and password criteria.
 		if (username.length() > 7 && password.length() > 7) {
 			if (password.equals(confirm)) {
-				User tmp = new User(username, password);
+				User tmp = new User(username, password, getString(R.string.crypto_version));
 				// Check if the user already exists.
 				if (!Authorizer.userAlreadyExists(tmp)) {
 					try {
+                        tmp.setLastUpdated( new Date() );
 						// Add a user with the writer.
 						Writer write = new Writer();
 						write.addUser(tmp);

@@ -5,14 +5,12 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import bartushk.gentpass.crypto.AESUtils;
 import bartushk.gentpass.data.PasswordInfo;
@@ -38,29 +36,26 @@ public class Reader extends FileInterface {
 	 * @return JSONArray containing all users.
 	 */
 	public JSONArray getUsersJSON() {
-		try {
-			// Read a string from the correct usersFile
-			int chr;
-			StringBuffer strBuf = new StringBuffer();
-			FileInputStream ifstream = new FileInputStream(usersFile);
-			while ((chr = ifstream.read()) != -1) {
-				strBuf.append((char) chr);
-			}
-			// Parse and return a JSONArray.
-			JSONParser jparse = new JSONParser();
-			return (JSONArray) jparse.parse(strBuf.toString());
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		} catch (Error e) {
-			e.printStackTrace();
-		}
+        FileInputStream ifstream = null;
+        try {
+            // Read a string from the correct usersFile
+            int chr;
+            StringBuffer strBuf = new StringBuffer();
+            ifstream = new FileInputStream(usersFile);
+            while ((chr = ifstream.read()) != -1) {
+                strBuf.append((char) chr);
+            }
+            // Parse and return a JSONArray.
+            JSONParser jparse = new JSONParser();
+            return (JSONArray) jparse.parse(strBuf.toString());
+        } catch (Exception e) {
+            Log.d(e.getCause().toString(), e.getMessage());
+        } finally {
+            if (ifstream != null) try { ifstream.close(); } catch (IOException logOrIgnore) {}
+        }
 
-		return null;
-	}
+        return null;
+    }
 
 	/**
 	 * Returns an ArrayList of PasswordInfo for a particular user based on the

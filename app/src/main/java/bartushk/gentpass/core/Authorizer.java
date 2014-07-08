@@ -21,11 +21,14 @@ public class Authorizer {
 	 * Validates a user login attempt by reading from the user file saved on the
 	 * android SD card.
 	 * 
-	 * @param user
-	 *            - The user object to be tested for validation.
+	 * @param username
+	 *            - The username of the user to test.
+     *
+     * @param password
+     *           - The password of the user to test.
 	 * @return Boolean of validation pass/fail.
 	 */
-	public static boolean validateUser(User user) {
+	public static User validateUser(String username, String password) {
 		try {
 			Reader read = new Reader();
 
@@ -37,19 +40,19 @@ public class Authorizer {
 			// Each object contains the username and
 			// it's corresponding channel.
 			for (int i = 0; i < jray.size(); i++) {
-				// If the username and challenge from the json array
-				// match that from the passed user object, return true.
-				if (((JSONObject) jray.get(i)).get("user").equals(
-						user.getUsername())
-						&& ((JSONObject) jray.get(i)).get("challenge").equals(
-								user.getChallenge())) {
-					return true;
+                JSONObject job = (JSONObject) jray.get(i);
+                String cryptoVersion = (String)job.get("crypto_version");
+                if(cryptoVersion == null) cryptoVersion = "Orig";
+			    User testUser = new User(username,password,cryptoVersion);
+				if (job.get("challenge").equals(
+                        testUser.getChallenge())) {
+					return testUser;
 				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return false;
+		return null;
 	}
 
 	/**

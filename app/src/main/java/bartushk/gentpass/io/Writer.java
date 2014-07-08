@@ -4,17 +4,14 @@ import android.os.Environment;
 import android.util.Log;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
 
 import bartushk.gentpass.crypto.AESUtils;
-import bartushk.gentpass.data.PasswordInfo;
+import bartushk.gentpass.data.JSONUtils;
 import bartushk.gentpass.data.User;
 
 /**
@@ -41,9 +38,7 @@ public class Writer extends FileInterface {
 		try {
 			Reader read = new Reader();
 			// Create a JSONObject with the username and challenge.
-			JSONObject job = new JSONObject();
-			job.put("user", user.getUsername());
-			job.put("challenge", user.getChallenge());
+			JSONObject job = JSONUtils.userToJSON(user);
 			// Get the JSONArray of all users.
 			JSONArray jray = read.getUsersJSON();
 			// Add the new JSONObject.
